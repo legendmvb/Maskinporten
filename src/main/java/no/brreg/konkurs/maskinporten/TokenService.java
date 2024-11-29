@@ -19,7 +19,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.net.URI;
 
 @Service
@@ -32,9 +31,9 @@ public class TokenService {
     @Value("${maskinporten.url}")
     String maskinportUrl;
 
-    public String hentMaskinportenToken(String scopes) throws Exception {
+    /*public String hentMaskinportenToken() throws Exception {
         RestTemplate restTemplate = new RestTemplate();
-        String jwt = jwtService.lagJwt(scopes);
+        String jwt = jwtService.createSignedJWT().serialize();
         log.debug("jwt {}", jwt);
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-type", "application/x-www-form-urlencoded");
@@ -51,30 +50,24 @@ public class TokenService {
             log.error(" url {} httpkode {} melding {} ", maskinportUrl, ex.getStatusCode(), ex.getResponseBodyAsString());
             throw new RuntimeException("hent Maskinporten token feiler", ex);
         }
+    }*/
+
+    public String getMaskinportenToken() throws Exception {
+        TokenResponse parse = null;
+        log.info("Henter token");
+        try {
+            SignedJWT requestToken = jwtService.createSignedJWT();
+            JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(requestToken);
+            TokenRequest tokenRequest = new TokenRequest(URI.create(maskinportUrl), jwtBearerGrant);
+            parse = TokenResponse.parse(tokenRequest.toHTTPRequest().send());
+            if (!parse.indicatesSuccess()) {
+                var parseError = parse.toErrorResponse().toJSONObject().toJSONString();
+                log.error("Parse not successfull: {}", parseError);
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        log.info("token: {} ", parse.toSuccessResponse().getTokens().getBearerAccessToken());
+        return String.valueOf(parse.toSuccessResponse().getTokens().getBearerAccessToken());
     }
-
-
-
-
-
-
-//
-//    public String validateMaskinportenToken(String scope) throws Exception {
-//        TokenResponse parse = null;
-//        log.info("Henter token");
-//        try {
-//            SignedJWT requestToken = jwtService.createSignedJWT(scope);
-//            JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(requestToken);
-//            TokenRequest tokenRequest = new TokenRequest(URI.create(maskinportUrl), jwtBearerGrant);
-//            parse = TokenResponse.parse(tokenRequest.toHTTPRequest().send());
-//            if (!parse.indicatesSuccess()) {
-//                var parseError = parse.toErrorResponse().toJSONObject().toJSONString();
-//                log.error("Parse not successfull: {}", parseError);
-//            }
-//        } catch (Exception e) {
-//            log.error(e.getMessage(), e);
-//        }
-//        log.info("token: {} ", parse.toSuccessResponse().getTokens().getBearerAccessToken());
-//        return  String.valueOf(parse.toSuccessResponse().getTokens().getBearerAccessToken());
-//    }
 }

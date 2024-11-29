@@ -12,15 +12,10 @@ public class MaskinportenTest {
     @Test
     void maskinporten() throws Exception {
 
-       String test = tokenService.hentMaskinportenToken("brreg:konkurs.info");
 
 
-
-
-
-        //String test1 = tokenService.validateMaskinportenToken("brreg:konkursinformasjon");
-        //System.out.println(test);
-        System.out.println(test);
+        String test1 = tokenService.hentMaskinportenToken();
+        System.out.println(test1);
     }
 }
 
