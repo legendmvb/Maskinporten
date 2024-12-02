@@ -14,7 +14,7 @@ public class MaskinportenTest {
 
 
 
-        String test1 = tokenService.hentMaskinportenToken();
+        String test1 = tokenService.getMaskinportenToken();
         System.out.println(test1);
     }
 }
