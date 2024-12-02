@@ -57,6 +57,7 @@ public class TokenService {
         log.info("Henter token");
         try {
             SignedJWT requestToken = jwtService.createSignedJWT();
+            log.info(requestToken.serialize());
             JWTBearerGrant jwtBearerGrant = new JWTBearerGrant(requestToken);
             TokenRequest tokenRequest = new TokenRequest(URI.create(maskinportUrl), jwtBearerGrant);
             parse = TokenResponse.parse(tokenRequest.toHTTPRequest().send());
